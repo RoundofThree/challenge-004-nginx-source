@@ -1638,7 +1638,7 @@ ngx_black_list_insert(ngx_black_list_t **black_list, u_char insert_ip[],
         return;
     }
 
-    for (reader = reader; reader && reader->next; reader = reader->next) {
+    for (; reader && reader->next; reader = reader->next) {
 
          if (!ngx_strcmp(insert_ip, reader->IP->data)) {
             ngx_destroy_black_list_link(new_black_list);
@@ -1682,7 +1682,7 @@ ngx_is_ip_banned(ngx_cycle_t *cycle, ngx_connection_t *connection)
 {
     ngx_black_list_t *reader = (cycle) ? cycle->black_list : NULL;
 
-    for (reader = reader; reader; reader = reader->next) {
+    for (; reader; reader = reader->next) {
             if (!ngx_strcmp(connection->addr_text.data, reader->IP->data)) {
                 ngx_close_connection(connection);
                 return NGX_ERROR;
