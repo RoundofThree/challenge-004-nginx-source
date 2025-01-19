@@ -59,6 +59,18 @@ ngx_array_push(ngx_array_t *a)
 
         p = a->pool;
 
+#if defined(__CHERI_PURE_CAPABILITY__)
+	/* allocate a new array */
+
+	new = ngx_palloc(p, 2 * size);
+	if (new == NULL) {
+	return NULL;
+	}
+
+	ngx_memcpy(new, a->elts, size);
+	a->elts = new;
+	a->nalloc *= 2;
+#else
         if ((u_char *) a->elts + size == p->d.last
             && p->d.last + a->size <= p->d.end)
         {
@@ -82,6 +94,7 @@ ngx_array_push(ngx_array_t *a)
             a->elts = new;
             a->nalloc *= 2;
         }
+#endif
     }
 
     elt = (u_char *) a->elts + a->size * a->nelts;
