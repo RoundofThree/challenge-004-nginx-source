@@ -156,5 +156,11 @@ typedef uintptr_t	ngx_ptraddr_t;
 
 #endif
 
+#if defined __has_include
+#  if __has_include (<cheriintrin.h>)
+#    include <cheriintrin.h>
+#  endif
+#endif
+
 
 #endif /* _NGX_CONFIG_H_INCLUDED_ */
