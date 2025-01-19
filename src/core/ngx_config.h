@@ -43,6 +43,10 @@
 
 #endif
 
+#ifndef __has_builtin
+#define __has_builtin(x) 0
+#endif
+
 
 #ifndef NGX_HAVE_SO_SNDLOWAT
 #define NGX_HAVE_SO_SNDLOWAT     1
@@ -102,9 +106,14 @@ typedef uintptr_t	ngx_ptraddr_t;
 #define NGX_ALIGNMENT   sizeof(unsigned long)    /* platform word */
 #endif
 
+#if __has_builtin(__builtin_align_up)
+#define ngx_align(d, a)     __builtin_align_up(d, a)
+#define ngx_align_ptr(p, a) __builtin_align_up(p, a)
+#else
 #define ngx_align(d, a)     (((d) + (a - 1)) & ~(a - 1))
 #define ngx_align_ptr(p, a)                                                   \
     (u_char *) (((uintptr_t) (p) + ((uintptr_t) a - 1)) & ~((uintptr_t) a - 1))
+#endif
 
 
 #define ngx_abort       abort
