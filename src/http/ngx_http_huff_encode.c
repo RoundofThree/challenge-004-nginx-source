@@ -156,7 +156,7 @@ static ngx_http_huff_encode_code_t  ngx_http_huff_encode_table_lc[256] =
 };
 
 
-#if (NGX_PTR_SIZE == 8)
+#if ((defined(__SIZEOF_SIZE_T__) && __SIZEOF_SIZE_T__ == 8) || (!defined(__SIZEOF_SIZE_T__) && NGX_PTR_SIZE == 8))
 
 #if (NGX_HAVE_LITTLE_ENDIAN)
 
