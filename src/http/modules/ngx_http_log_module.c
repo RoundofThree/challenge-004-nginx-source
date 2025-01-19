@@ -774,10 +774,10 @@ ngx_http_log_copy_short(ngx_http_request_t *r, u_char *buf,
     ngx_http_log_op_t *op)
 {
     size_t     len;
-    uintptr_t  data;
+    ngx_ptraddr_t  data;
 
     len = op->len;
-    data = op->data;
+    data = (ngx_ptraddr_t) op->data;
 
     while (len--) {
         *buf++ = (u_char) (data & 0xff);
@@ -1722,7 +1722,7 @@ ngx_http_log_compile_format(ngx_conf_t *cf, ngx_array_t *flushes,
                 op->len = len;
                 op->getlen = NULL;
 
-                if (len <= sizeof(uintptr_t)) {
+                if (len <= sizeof(ngx_ptraddr_t)) {
                     op->run = ngx_http_log_copy_short;
                     op->data = 0;
 

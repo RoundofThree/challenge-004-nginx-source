@@ -79,6 +79,11 @@ typedef intptr_t        ngx_int_t;
 typedef uintptr_t       ngx_uint_t;
 typedef intptr_t        ngx_flag_t;
 
+#ifdef _PTRADDR_T_DECLARED
+typedef ptraddr_t	ngx_ptraddr_t;
+#else
+typedef uintptr_t	ngx_ptraddr_t;
+#endif
 
 #define NGX_INT32_LEN   (sizeof("-2147483648") - 1)
 #define NGX_INT64_LEN   (sizeof("-9223372036854775808") - 1)
