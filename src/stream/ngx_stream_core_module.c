@@ -381,7 +381,7 @@ ngx_stream_core_init_main_conf(ngx_conf_t *cf, void *conf)
     ngx_stream_core_main_conf_t *cmcf = conf;
 
     ngx_conf_init_uint_value(cmcf->variables_hash_max_size, 1024);
-    ngx_conf_init_uint_value(cmcf->variables_hash_bucket_size, 64);
+    ngx_conf_init_uint_value(cmcf->variables_hash_bucket_size, 128);
 
     cmcf->variables_hash_bucket_size =
                ngx_align(cmcf->variables_hash_bucket_size, ngx_cacheline_size);
