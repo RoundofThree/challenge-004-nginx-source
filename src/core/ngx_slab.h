@@ -16,7 +16,7 @@
 typedef struct ngx_slab_page_s  ngx_slab_page_t;
 
 struct ngx_slab_page_s {
-    uintptr_t         slab;
+    ptraddr_t         slab;
     ngx_slab_page_t  *next;
     uintptr_t         prev;
 };
