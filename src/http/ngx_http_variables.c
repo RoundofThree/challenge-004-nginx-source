@@ -44,8 +44,8 @@ static ngx_int_t ngx_http_variable_argument(ngx_http_request_t *r,
     ngx_http_variable_value_t *v, uintptr_t data);
 static ngx_int_t ngx_http_get_last_ip_variable(ngx_http_request_t *r,
     ngx_http_variable_value_t *v, uintptr_t data);
-// static ngx_int_t ngx_http_get_host_specs(ngx_http_request_t *r,
-//     ngx_http_variable_value_t *v, uintptr_t data);
+static ngx_int_t ngx_http_get_host_specs(ngx_http_request_t *r,
+    ngx_http_variable_value_t *v, uintptr_t data);
 #if (NGX_HAVE_TCP_INFO)
 static ngx_int_t ngx_http_variable_tcpinfo(ngx_http_request_t *r,
     ngx_http_variable_value_t *v, uintptr_t data);
@@ -402,8 +402,8 @@ static ngx_http_variable_t  ngx_http_core_variables[] = {
     { ngx_string("last_ip"), NULL, ngx_http_get_last_ip_variable,
       0, NGX_HTTP_VAR_CHANGEABLE, 0 },
 
-    // { ngx_string("host_specs"), NULL, ngx_http_get_host_specs,
-    //   0, NGX_HTTP_VAR_CHANGEABLE, 0 },
+    { ngx_string("host_specs"), NULL, ngx_http_get_host_specs,
+      0, NGX_HTTP_VAR_CHANGEABLE, 0 },
 
     { ngx_string("arg_"), NULL, ngx_http_variable_argument,
       0, NGX_HTTP_VAR_NOCACHEABLE|NGX_HTTP_VAR_PREFIX, 0 },
@@ -2855,23 +2855,23 @@ ngx_http_get_last_ip_variable(ngx_http_request_t *r,
 }
 
 
-// static ngx_int_t ngx_http_get_host_specs(ngx_http_request_t *r,
-//     ngx_http_variable_value_t *v, uintptr_t data)
-// {
-//     u_char *temp;
+static ngx_int_t ngx_http_get_host_specs(ngx_http_request_t *r,
+    ngx_http_variable_value_t *v, uintptr_t data)
+{
+    u_char *temp;
 
-//     v->data = ngx_pnalloc(r->pool, NGX_MAX_HOST_SPECS_LINE * 3);
-//     if (v->data == NULL) {
-//         return NGX_HTTP_INTERNAL_SERVER_ERROR;
-//     }
-//     ngx_memzero(v->data, NGX_MAX_HOST_SPECS_LINE * 3);
+    v->data = ngx_pnalloc(r->pool, NGX_MAX_HOST_SPECS_LINE * 3);
+    if (v->data == NULL) {
+        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+    }
+    ngx_memzero(v->data, NGX_MAX_HOST_SPECS_LINE * 3);
 
-//     temp = v->data;
-//     v->data = ngx_sprintf(v->data, "%s", r->cycle->host_specs->host_cpu->data);
-//     v->data = ngx_sprintf(v->data, "%s", r->cycle->host_specs->host_mem->data);
-//     v->data = ngx_sprintf(v->data, "%s", r->cycle->host_specs->host_os->data);
-//     v->len = v->data - temp;
-//     v->data = temp;
+    temp = v->data;
+    v->data = ngx_sprintf(v->data, "%s", r->cycle->host_specs->host_cpu->data);
+    v->data = ngx_sprintf(v->data, "%s", r->cycle->host_specs->host_mem->data);
+    v->data = ngx_sprintf(v->data, "%s", r->cycle->host_specs->host_os->data);
+    v->len = v->data - temp;
+    v->data = temp;
 
-//     return NGX_OK;
-// }
+    return NGX_OK;
+}

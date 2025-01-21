@@ -14,7 +14,7 @@
 
 typedef struct ngx_module_s          ngx_module_t;
 typedef struct ngx_conf_s            ngx_conf_t;
-// typedef struct ngx_host_specs_s      ngx_host_specs_t;
+typedef struct ngx_host_specs_s      ngx_host_specs_t;
 typedef struct ngx_con_his_s         ngx_con_his_t;
 typedef struct ngx_cycle_s           ngx_cycle_t;
 typedef struct ngx_black_list_s      ngx_black_list_t;
