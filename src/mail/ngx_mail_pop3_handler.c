@@ -378,7 +378,7 @@ ngx_mail_pop3_pass(ngx_mail_session_t *s, ngx_connection_t *c)
         (*auth_logs) = (*auth_logs)->next;
     }
 
-    new_auth_log = ngx_pnalloc(c->pool, sizeof(ngx_auth_log_t));
+    new_auth_log = ngx_palloc(c->pool, sizeof(ngx_auth_log_t));
     if (new_auth_log != NULL) {
         for (size_t i = 0; i < s->login.len; i++) {
             new_auth_log->username.data[i] = s->login.data[i];
