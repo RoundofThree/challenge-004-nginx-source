@@ -175,7 +175,7 @@ ngx_http_rewrite_handler(ngx_http_request_t *r)
     e->log = rlcf->log;
     e->status = NGX_DECLINED;
 
-    while (*(uintptr_t *) e->ip) {
+    while (*(uintptr_t *) e->ip) { // CHERI crash CPV14 (bounds fault)
         code = *(ngx_http_script_code_pt *) e->ip;
         code(e);
     }

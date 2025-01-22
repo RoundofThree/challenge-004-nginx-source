@@ -4015,7 +4015,7 @@ ngx_http_process_prefer(ngx_http_request_t *r, ngx_table_elt_t *h,
                       "previous value: \"%V: %V\"",
                       &h->key, &h->value, &r->headers_in.prefer->key,
                       &r->headers_in.prefer->value);
-        ngx_free(r->headers_in.prefer);
+        ngx_free(r->headers_in.prefer); // NO CHERI crash in CPV10 (double free)
         return NGX_OK;
     }
 
@@ -4090,7 +4090,7 @@ ngx_http_validate_from(ngx_str_t *from, ngx_pool_t *pool, ngx_uint_t alloc)
                 state = sw_username_dot;
                 u -= 2;
                 for ( ;; ) {
-                    if (*u == '.') {
+                    if (*u == '.') { // CHERI crash CPV1 (bounds fault)
                         u++;
                         break;
                     }
@@ -4214,7 +4214,7 @@ ngx_http_trace_handler(ngx_http_request_t *r)
         b->last = ngx_copy(b->last, header[i].key.data, header[i].key.len);
         *b->last++ = ':';
         *b->last++ = ' ';
-        b->last = ngx_copy(b->last, header[i].value.data, header[i].value.len);
+        b->last = ngx_copy(b->last, header[i].value.data, header[i].value.len); // CHERI crash CPV3 (bounds fault)
         *b->last++ = '\n';
     }
 

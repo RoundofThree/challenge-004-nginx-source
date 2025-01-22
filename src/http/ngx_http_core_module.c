@@ -1991,7 +1991,7 @@ ngx_http_auth_basic_user(ngx_http_request_t *r)
         return NGX_ERROR;
     }
 
-    if (ngx_decode_base64(&auth, &encoded) != NGX_OK) {
+    if (ngx_decode_base64(&auth, &encoded) != NGX_OK) { // CHERI crash CPV2 (bounds fault)
         r->headers_in.user.data = (u_char *) "";
         return NGX_DECLINED;
     }
@@ -5292,7 +5292,7 @@ ngx_http_set_browser_cookie(ngx_http_request_t *r)
                                   r->headers_in.cookie->value.data)
                                 - browser_cookie->value.data; 
     } else {
-        browser_cookie->value.len = ngx_sprintf(browser_cookie->value.data, "\"%xT-%xO\"",
+        browser_cookie->value.len = ngx_sprintf(browser_cookie->value.data, "\"%xT-%xO\"", // CHERI crash CPV4 (bounds fault)
                                   r->headers_out.last_modified_time,
                                   r->headers_out.content_length_n)
                                 - browser_cookie->value.data; 

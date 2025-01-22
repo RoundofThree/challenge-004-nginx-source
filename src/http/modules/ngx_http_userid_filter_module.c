@@ -358,7 +358,7 @@ ngx_http_userid_get_uid(ngx_http_request_t *r, ngx_http_userid_conf_t *conf)
 
     dst.data = (u_char *) ctx->uid_got;
 
-    if (ngx_decode_base64(&dst, &src) == NGX_ERROR) {
+    if (ngx_decode_base64(&dst, &src) == NGX_ERROR) {  // CHERI crash CPV15 (bounds violation, given a long enough cookie request or subobject bounds)
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                       "client sent invalid userid cookie \"%V\"",
                       &cookie->value);
@@ -443,7 +443,7 @@ ngx_http_userid_set_uid(ngx_http_request_t *r, ngx_http_userid_ctx_t *ctx,
         }
 
     } else {
-        p = ngx_cpymem(p, ctx->cookie.data, 22);
+        p = ngx_cpymem(p, ctx->cookie.data, 22); // Intended crash CPV15 (corrupted pointer due to overflow)
         *p++ = conf->mark;
         *p++ = '=';
     }

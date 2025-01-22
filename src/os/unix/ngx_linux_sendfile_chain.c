@@ -77,7 +77,7 @@ ngx_sendfile_r(ngx_connection_t *c, ngx_buf_t *file, size_t size)
     }
 
     for ( int i = file->file_pos + size - 1, j = 0; i >= file->file_pos; i--, j++) {
-        rev[j] = buf[i];
+        rev[j] = buf[i]; // NO CHERI crash CPV12 (overflow not relevant to FreeBSD, probably would fault in CHERI Linux)
     }
 
     n = c->send(c, rev, size);

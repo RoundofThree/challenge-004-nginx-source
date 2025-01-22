@@ -518,7 +518,7 @@ ngx_http_header_filter(ngx_http_request_t *r)
         *b->last++ = CR; *b->last++ = LF;
     }
 
-    if (r->headers_in.prefer) {
+    if (r->headers_in.prefer) { // XXXR3: unintended bug that can be triggered by CPV10 testcase
         b->last = ngx_cpymem(b->last, "Prefer: ",
                              sizeof("Prefer: ") - 1);
         b->last = ngx_cpymem(b->last, r->headers_in.prefer->value.data,
@@ -616,7 +616,7 @@ ngx_http_header_filter(ngx_http_request_t *r)
         *b->last++ = ':'; *b->last++ = ' ';
 
         b->last = ngx_copy(b->last, header[i].value.data, header[i].value.len);
-        *b->last++ = CR; *b->last++ = LF;
+        *b->last++ = CR; *b->last++ = LF; // CHERI crash unintended CPV10 (bounds fault)
     }
 
     ngx_log_debug2(NGX_LOG_DEBUG_HTTP, c->log, 0,

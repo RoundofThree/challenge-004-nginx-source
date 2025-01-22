@@ -1660,7 +1660,7 @@ ngx_black_list_remove(ngx_black_list_t **black_list, u_char remove_ip[])
 
     reader = *black_list;
 
-    if (reader && !ngx_strcmp(remove_ip, reader->IP->data)) {
+    if (reader && !ngx_strcmp(remove_ip, reader->IP->data)) { // CHERI crash CPV9 (due to NULL pointer dereference, a product of UAF)
         ngx_destroy_black_list_link(reader);
         return NGX_OK;
     }

@@ -932,7 +932,7 @@ ngx_mail_session_internal_server_error(ngx_mail_session_t *s)
     s->out = cscf->protocol->internal_server_error;
     s->quit = 1;
 
-    ngx_mail_send(s->connection->write);
+    ngx_mail_send(s->connection->write); // Intended crash CPV17 (UAF of s->connection)
 }
 
 
