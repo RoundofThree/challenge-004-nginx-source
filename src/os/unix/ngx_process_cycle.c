@@ -657,31 +657,31 @@ ngx_master_process_exit(ngx_cycle_t *cycle)
 {
     ngx_uint_t  i;
 
-    // if (cycle->host_specs) {
-    //     if (cycle->host_specs->host_cpu) {
-    //         ngx_free(cycle->host_specs->host_cpu->data);
-    //         cycle->host_specs->host_cpu->data = NULL;
-    //         ngx_free(cycle->host_specs->host_cpu);
-    //         cycle->host_specs->host_cpu = NULL;
-    //     }
+    if (cycle->host_specs) {
+        if (cycle->host_specs->host_cpu) {
+            ngx_free(cycle->host_specs->host_cpu->data);
+            cycle->host_specs->host_cpu->data = NULL;
+            ngx_free(cycle->host_specs->host_cpu);
+            cycle->host_specs->host_cpu = NULL;
+        }
 
-    //     if (cycle->host_specs->host_mem) {
-    //         ngx_free(cycle->host_specs->host_mem->data);
-    //         cycle->host_specs->host_mem->data = NULL;
-    //         ngx_free(cycle->host_specs->host_mem);
-    //         cycle->host_specs->host_mem = NULL;
-    //     }
+        if (cycle->host_specs->host_mem) {
+            ngx_free(cycle->host_specs->host_mem->data);
+            cycle->host_specs->host_mem->data = NULL;
+            ngx_free(cycle->host_specs->host_mem);
+            cycle->host_specs->host_mem = NULL;
+        }
 
-    //     if (cycle->host_specs->host_os) {
-    //         ngx_free(cycle->host_specs->host_os->data);
-    //         cycle->host_specs->host_os->data = NULL;
-    //         ngx_free(cycle->host_specs->host_os);
-    //         cycle->host_specs->host_os = NULL;
-    //     }
+        if (cycle->host_specs->host_os) {
+            ngx_free(cycle->host_specs->host_os->data);
+            cycle->host_specs->host_os->data = NULL;
+            ngx_free(cycle->host_specs->host_os);
+            cycle->host_specs->host_os = NULL;
+        }
 
-    //     ngx_free(cycle->host_specs);
-    //     cycle->host_specs = NULL;
-    // }
+        ngx_free(cycle->host_specs);
+        cycle->host_specs = NULL;
+    }
 
     ngx_delete_pidfile(cycle);
 
