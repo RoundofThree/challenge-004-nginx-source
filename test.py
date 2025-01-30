@@ -47,12 +47,13 @@ def main():
 
     parser = argparse.ArgumentParser(description="Start NGINX and send a request.")
     parser.add_argument("cp_folder", help="Path to the test folder")
+    parser.add_argument("request_file", default="request.txt", help="Filename of the request")
 
     args = parser.parse_args()
 
     cp_folder = os.path.abspath(args.cp_folder)
     conf_file = os.path.join(cp_folder, "test.conf")
-    data_file = os.path.join(cp_folder, "request.txt")
+    data_file = os.path.join(cp_folder, args.request_file)
 
     try:
         # Start NGINX with the custom configuration
