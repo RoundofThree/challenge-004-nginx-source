@@ -505,6 +505,8 @@ ngx_kqueue_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
     ngx_event_t      *ev;
     ngx_queue_t      *queue;
     struct timespec   ts, *tp;
+    ngx_connection_t  *c;
+    ngx_con_his_t     *new_con_his;
 
     n = (int) nchanges;
     nchanges = 0;
@@ -664,6 +666,23 @@ ngx_kqueue_process_events(ngx_cycle_t *cycle, ngx_msec_t timer,
             ngx_post_event(ev, queue);
 
             continue;
+        }
+
+        if (event_list[i].filter == EVFILT_READ && ev->active) {
+            c = ev->data;
+            // c should not be NULL at this point
+            if (c->number > cycle->connection_counter) {
+                new_con_his = ngx_palloc(cycle->pool, sizeof(ngx_con_his_t));
+                ngx_memzero(new_con_his, sizeof(ngx_con_his_t));
+                ngx_memcpy(&new_con_his->addr_text, &c->addr_text, sizeof(ngx_str_t));
+
+                ngx_insert_con_his(&cycle->connection_history, new_con_his);
+
+                cycle->connection_counter = c->number;
+                ev->connection_counter = c->number;
+                ev->connection_history = cycle->connection_history;
+            }
+            ev->cycle = cycle;
         }
 
         ev->handler(ev);
