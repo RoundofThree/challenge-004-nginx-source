@@ -26,7 +26,7 @@ struct ngx_rbtree_node_s {
     ngx_rbtree_node_t     *parent;
     u_char                 color;
     u_char                 data;
-};
+} __subobject_use_container_bounds;
 
 
 typedef struct ngx_rbtree_s  ngx_rbtree_t;
