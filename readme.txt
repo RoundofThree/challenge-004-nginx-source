@@ -54,3 +54,9 @@ Some Challege Project Vulnerabilities (CPV) were added to features that have pla
 * The connection history feature is implemented by recording the connections in ngx_epoll_process_events, but FreeBSD uses ngx_kqueue_module instead of ngx_epoll_module. I ported the connection history feature to ngx_kqueue_module and I hope I didn't add new vulnerabilities.
 
 * The feature of sending a range of data from a resource with the option to reverse the data stream is implemented in ngx_linux_sendfile_chain.c, which is specific to Linux as the name suggests. **I haven't ported this feature to FreeBSD.** I risk introducing new bugs if I naively add the reverse sendfile feature to FreeBSD. This means that CPV12 cannot be reproduced in FreeBSD/CheriBSD. 
+
+
+CHERI+ASan Build
+================
+
+AIxCC Nginx can be built and run with CHERI+ASan. However, the reproducibility is low currently, as CHERI+ASan support is not yet upstreamed.
