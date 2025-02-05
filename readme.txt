@@ -50,5 +50,7 @@ Difference between AIxCC Linux and FreeBSD/CheriBSD
 Some Challege Project Vulnerabilities (CPV) were added to features that have platform-dependent implementations. For such CPVs, we need to port the features to FreeBSD/CheriBSD as faithfully as possible so that no new vulnerabilities are added in the porting process. Some features also require patches to be compatible with BSD systems. These are the main differences:
 
 * In AIxCC Nginx, the host specs feature implementation reads from /proc which is not mounted by default in FreeBSD. Then, fclose(NULL) causes SEGFAULT in FreeBSD while it does not in recent Linux. I patched it so that the process doesn't crash and the default "Unknown" host specifications are shown. I'm not going to fix the functionality of the host specs feature because that's irrelevant to the analysis of the UAF vulnerability. 
+
 * The connection history feature is implemented by recording the connections in ngx_epoll_process_events, but FreeBSD uses ngx_kqueue_module instead of ngx_epoll_module. I ported the connection history feature to ngx_kqueue_module and I hope I didn't add new vulnerabilities.
+
 * The feature of sending a range of data from a resource with the option to reverse the data stream is implemented in ngx_linux_sendfile_chain.c, which is specific to Linux as the name suggests. **I haven't ported this feature to FreeBSD.** I risk introducing new bugs if I naively add the reverse sendfile feature to FreeBSD. This means that CPV12 cannot be reproduced in FreeBSD/CheriBSD. 
