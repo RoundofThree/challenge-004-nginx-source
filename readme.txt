@@ -21,18 +21,24 @@ To build with subobject bounds, add `-Xclang -cheri-bounds=subobject-safe`:
 ./configure --with-cc-opt='-Wno-cheri-provenance -Xclang -cheri-bounds=subobject-safe' --without-http_geo_module --with-http_ssl_module --with-pcre --with-compat --with-mail --with-http_v2_module
 make -j4
 
-* Run the CPV trigger tests 
+For development purposes, point the hardcoded paths to /tmp/nginx and create the /tmp/nginx directory, so that we don't need to use `sudo` to start Nginx processes, by adding:
 
-sudo make install
-sudo mkdir /tmp/cores
-sudo python3 test.py <cp_folder> <request.txt>
+--error-log-path=/tmp/nginx/error.log --http-log-path=/tmp/nginx/access.log --pid-path=/tmp/nginx/nginx.pid
+
+* Run the CPV trigger tests
+
+Assuming the hardcoded paths were changed to /tmp/nginx as illustrated above, we don't need to `make install` nor use `sudo` to start Nginx.
+
+mkdir /tmp/cores
+mkdir /tmp/nginx
+python3 test.py <cp_folder> <request.txt>
 
 For example, 
-sudo python3 test.py cp1 request.txt
+python3 test.py cp1 request.txt
 
 To generate coredumps in CheriBSD, you need to set up your box like this:
 
-sudo sysctl kern.sugid_coredump=1
+sudo sysctl kern.sugid_coredump=1 (if you used `sudo` to start Nginx or the test.py script)
 sudo sysctl kern.corefile=%N.%P.core
 ulimit -c unlimited
 
