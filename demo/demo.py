@@ -18,13 +18,11 @@ pop3_port = 1111
 
 def get_nginx_worker_pid():
     try:
-        # Run the 'ps aux' command and capture its output
         output = subprocess.check_output(["ps", "aux"]).decode('utf-8')
     except subprocess.CalledProcessError as e:
         print("Error executing ps aux:", e)
         return None
 
-    # Loop over each line in the output
     for line in output.splitlines():
         if "nginx: worker process" in line:
             # Split the line into columns (the PID is the second column)
@@ -47,7 +45,7 @@ def send_request(request, verbose=False):
         raise RuntimeError("[!] Error: Request file is empty.")
     
     port = 0
-    # rather simplistic logic
+    # rather simplistic and overfit logic
     if b'HTTP' in request:
         port = http_port
     elif b'USER' in request:
@@ -74,20 +72,25 @@ def list_blob_files(directory="."):
 
 def run_triggers():
     blob_files = list_blob_files()
-    
+    worker_pid = -1
+    prev_pid = -1
     for blob_file in blob_files:
-        print(f'[+] Running trigger {blob_file}')
+        print(f'[+] Running trigger {blob_file} ' + 20 * '=')
         try:
             # record the PID of the Nginx worker (these could be used to analyse the resulting error.log file)
-            worker_pid = get_nginx_worker_pid()
-            print(f'[*] Nginx worker PID = {worker_pid}')
+            prev_pid = get_nginx_worker_pid()
+            print(f'[*] Nginx worker PID = {prev_pid}')
             with open(blob_file, "rb") as file:
                 request = file.read()
-                send_request(request, verbose=True)
-            
+                send_request(request, verbose=False)
+            time.sleep(1) # allow some time
+            worker_pid = get_nginx_worker_pid()
+            if worker_pid != prev_pid:
+                print(f'[+] Nginx worker process crashed!')
+            else:
+                print(f"[!] Nginx worker process didn't crash")
         except FileNotFoundError:
             raise RuntimeError(f"[!] Error: Request file '{blob_file}' not found.")
-        time.sleep(1) # allow some time
 
 
 def main():
