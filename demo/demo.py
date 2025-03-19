@@ -6,7 +6,7 @@ import socket
 import time
 import subprocess
 
-
+# ugly sleep times too
 # hardcoded
 nginx_bin = "../objs/nginx"
 conf_file = "demo.conf"
@@ -39,6 +39,10 @@ def start_nginx(config_file):
         raise RuntimeError(f"[!] Failed to start NGINX with config file: {config_file}")
     print(f"[+] NGINX started with config file: {config_file}")
 
+def stop_nginx():
+    os.system(f"{nginx_bin} -s stop")
+    print("[+] NGINX stopped")
+
 
 def send_request(request, verbose=False):
     if not request:
@@ -60,7 +64,6 @@ def send_request(request, verbose=False):
             raise RuntimeError(f"[!] Error connecting to server: {e}")
 
         sock.sendall(request)
-
         response = sock.recv(4096).decode('utf-8')
         if verbose:
             print("[+] Response from server:\n" + response)
@@ -77,6 +80,9 @@ def run_triggers():
     for blob_file in blob_files:
         print(f'[+] Running trigger {blob_file} ' + 20 * '=')
         try:
+            start_nginx(config_file=conf_file)
+            # Wait for NGINX to fully start
+            time.sleep(2)
             # record the PID of the Nginx worker (these could be used to analyse the resulting error.log file)
             prev_pid = get_nginx_worker_pid()
             print(f'[*] Nginx worker PID = {prev_pid}')
@@ -91,22 +97,16 @@ def run_triggers():
                 print(f"[!] Nginx worker process didn't crash")
         except FileNotFoundError:
             raise RuntimeError(f"[!] Error: Request file '{blob_file}' not found.")
+        finally:
+            stop_nginx()
+            time.sleep(1)
 
 
 def main():
-    try:
-        os.remove(error_log_path)
-        with open(error_log_path, 'w') as fp:
-            pass
-        start_nginx(config_file=conf_file)
-
-        # Wait for NGINX to fully start
-        time.sleep(2)
-
-        run_triggers()
-    finally:
-        os.system(f"{nginx_bin} -s stop")
-        print("NGINX stopped")
+    os.remove(error_log_path)
+    with open(error_log_path, 'w') as fp:
+        pass
+    run_triggers()
 
 if __name__ == "__main__":
     main()
