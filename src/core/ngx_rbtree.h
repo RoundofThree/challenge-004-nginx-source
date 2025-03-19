@@ -12,6 +12,11 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 
+#ifdef __CHERI_PURE_CAPABILITY__
+#define SUBOBJECT_USE_CONTAINER_BOUNDS __subobject_use_container_bounds
+#else
+#define SUBOBJECT_USE_CONTAINER_BOUNDS 
+#endif
 
 typedef ngx_uint_t  ngx_rbtree_key_t;
 typedef ngx_int_t   ngx_rbtree_key_int_t;
@@ -26,7 +31,8 @@ struct ngx_rbtree_node_s {
     ngx_rbtree_node_t     *parent;
     u_char                 color;
     u_char                 data;
-} __subobject_use_container_bounds;
+} SUBOBJECT_USE_CONTAINER_BOUNDS;
+#undef SUBOBJECT_USE_CONTAINER_BOUNDS
 
 
 typedef struct ngx_rbtree_s  ngx_rbtree_t;

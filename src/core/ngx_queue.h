@@ -12,13 +12,19 @@
 #ifndef _NGX_QUEUE_H_INCLUDED_
 #define _NGX_QUEUE_H_INCLUDED_
 
+#ifdef __CHERI_PURE_CAPABILITY__
+#define SUBOBJECT_USE_CONTAINER_BOUNDS __subobject_use_container_bounds
+#else
+#define SUBOBJECT_USE_CONTAINER_BOUNDS 
+#endif
 
 typedef struct ngx_queue_s  ngx_queue_t;
 
 struct ngx_queue_s {
     ngx_queue_t  *prev;
     ngx_queue_t  *next;
-} __subobject_use_container_bounds;
+} SUBOBJECT_USE_CONTAINER_BOUNDS;
+#undef SUBOBJECT_USE_CONTAINER_BOUNDS
 
 
 #define ngx_queue_init(q)                                                     \
