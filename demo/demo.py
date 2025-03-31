@@ -8,13 +8,18 @@ import subprocess
 
 # ugly sleep times too
 # hardcoded
-nginx_bin = "../objs/nginx"
 conf_file = "demo.conf"
 host = "127.0.0.1"
-error_log_path = '/tmp/nginx/error.log'
 http_port = 8080
 smtp_port = 2525
 pop3_port = 1111
+
+# 3 configurations: aarch64, aarch64c, aarch64c+Q0
+configurations = ["aarch64", "aarch64c", "aarch64c+Q0"]
+nginx_aarch64c_bin = "../objs_aarch64c/nginx"
+nginx_aarch64_bin = "../objs_aarch64/nginx"
+aarch64_error_log_path = '/tmp/nginx_aarch64/error.log'
+aarch64c_error_log_path = '/tmp/nginx_aarch64c/error.log'
 
 def get_nginx_worker_pid():
     try:
@@ -24,24 +29,36 @@ def get_nginx_worker_pid():
         return None
 
     for line in output.splitlines():
-        if "nginx: worker process" in line:
+        # very hackish and prone to error
+        if "nginx: worker" in line:
             # Split the line into columns (the PID is the second column)
             columns = line.split()
             if len(columns) >= 2:
                 return int(columns[1])
     return None
 
-def start_nginx(config_file):
-    absolute_config_path = os.path.abspath(config_file) 
-    command = f"{nginx_bin} -c {absolute_config_path}"
+def start_nginx(config_file, configuration):
+    absolute_config_path = os.path.abspath(config_file)
+    if configuration == "aarch64":
+        command = f"{nginx_aarch64_bin} -c {absolute_config_path}"
+    elif configuration == "aarch64c":
+        command = f"{nginx_aarch64c_bin} -c {absolute_config_path}"
+    elif configuration == "aarch64c+Q0":
+        command = f"_RUNTIME_REVOCATION_EVERY_FREE_ENABLE=1 {nginx_aarch64c_bin} -c {absolute_config_path}"
+    else:
+        raise Exception(f"Unknown configuration {configuration}")
     ret = os.system(command)
     if ret != 0:
         raise RuntimeError(f"[!] Failed to start NGINX with config file: {config_file}")
-    print(f"[+] NGINX started with config file: {config_file}")
+    # print(f"[+] NGINX started with config file: {config_file}")
 
-def stop_nginx():
-    os.system(f"{nginx_bin} -s stop")
-    print("[+] NGINX stopped")
+
+def stop_nginx(configuration):
+    if configuration == "aarch64":
+        os.system(f"{nginx_aarch64_bin} -s stop")
+    else:
+        os.system(f"{nginx_aarch64c_bin} -s stop")
+    # print("[+] NGINX stopped")
 
 
 def send_request(request, verbose=False):
@@ -64,7 +81,7 @@ def send_request(request, verbose=False):
             raise RuntimeError(f"[!] Error connecting to server: {e}")
 
         sock.sendall(request)
-        response = sock.recv(4096).decode('utf-8')
+        response = sock.recv(4096)
         if verbose:
             print("[+] Response from server:\n" + response)
 
@@ -73,38 +90,52 @@ def list_blob_files(directory="."):
     return [f for f in os.listdir(directory) if f.endswith('.blob') and os.path.isfile(os.path.join(directory, f))]
 
 
+# run in three configurations
 def run_triggers():
     blob_files = list_blob_files()
     worker_pid = -1
     prev_pid = -1
     for blob_file in blob_files:
-        print(f'[+] Running trigger {blob_file} ' + 20 * '=')
+        request = None
         try:
-            start_nginx(config_file=conf_file)
-            # Wait for NGINX to fully start
-            time.sleep(2)
-            # record the PID of the Nginx worker (these could be used to analyse the resulting error.log file)
-            prev_pid = get_nginx_worker_pid()
-            print(f'[*] Nginx worker PID = {prev_pid}')
             with open(blob_file, "rb") as file:
                 request = file.read()
-                send_request(request, verbose=False)
-            time.sleep(1) # allow some time
-            worker_pid = get_nginx_worker_pid()
-            if worker_pid != prev_pid:
-                print(f'[+] Nginx worker process crashed!')
-            else:
-                print(f"[!] Nginx worker process didn't crash")
         except FileNotFoundError:
             raise RuntimeError(f"[!] Error: Request file '{blob_file}' not found.")
-        finally:
-            stop_nginx()
-            time.sleep(1)
+        
+        print(f'[+] Running trigger {blob_file} ' + 20 * '=')
+
+        for configuration in configurations:
+            try:
+                print(f'[*] Configuration {configuration}')
+                start_nginx(conf_file, configuration)
+                time.sleep(2)
+                prev_pid = get_nginx_worker_pid()
+                print(f'[*] Nginx worker PID = {prev_pid}')
+                send_request(request, verbose=False)
+                time.sleep(1) # allow some time
+                worker_pid = get_nginx_worker_pid()
+                if worker_pid != prev_pid:
+                    print(f'[+] Nginx worker process crashed!')
+                else:
+                    print(f"[!] Nginx worker process didn't crash")
+            finally:
+                stop_nginx(configuration)
+                time.sleep(1)
 
 
 def main():
-    os.remove(error_log_path)
-    with open(error_log_path, 'w') as fp:
+    try:
+        os.remove(aarch64_error_log_path)
+    except:
+        pass
+    try:
+        os.remove(aarch64c_error_log_path)
+    except:
+        pass
+    with open(aarch64_error_log_path, 'w') as fp:
+        pass
+    with open(aarch64c_error_log_path, 'w') as fp:
         pass
     run_triggers()
 

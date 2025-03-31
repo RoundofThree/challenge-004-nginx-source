@@ -141,6 +141,22 @@ else
 
         if [ $ngx_found = no ]; then
 
+            # CheriBSD hybrid port
+
+            ngx_feature="PCRE library in /usr/local64/"
+            ngx_feature_path="/usr/local64/include"
+
+            if [ $NGX_RPATH = YES ]; then
+                ngx_feature_libs="-R/usr/local64/lib -L/usr/local64/lib -lpcre"
+            else
+                ngx_feature_libs="-L/usr/local64/lib -lpcre"
+            fi
+
+            . auto/feature
+        fi
+
+        if [ $ngx_found = no ]; then
+
             # RedHat RPM, Solaris package
 
             ngx_feature="PCRE library in /usr/include/pcre/"
