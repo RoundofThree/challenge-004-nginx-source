@@ -192,7 +192,7 @@ def main():
             cpv_number = "B" + str(i - 17)
         else:
             cpv_number = str(i)
-        if cpv_number == 12: # Linux-specific code path
+        if cpv_number == "12": # Linux-specific code path
             row = [cpv_number, "N/A", "N/A", "N/A"]
         else:
             row = [cpv_number, get_signal_name(aarch64_signal) if aarch64_signal else '-',
