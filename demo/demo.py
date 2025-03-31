@@ -4,7 +4,10 @@
 import os
 import socket
 import time
+import signal
+import re
 import subprocess
+from tabulate import tabulate
 
 # ugly sleep times too
 # hardcoded
@@ -20,6 +23,14 @@ nginx_aarch64c_bin = "../objs_aarch64c/nginx"
 nginx_aarch64_bin = "../objs_aarch64/nginx"
 aarch64_error_log_path = '/tmp/nginx_aarch64/error.log'
 aarch64c_error_log_path = '/tmp/nginx_aarch64c/error.log'
+
+# results. cpv number (where bcpv counts as 17+i) -> PID
+aarch64_pids = {}
+aarch64c_pids = {}
+aarch64c_q0_pids = {}
+
+table_headers = ["CPV", "aarch64", "aarch64c", "aarch64c+Q0"]
+table_rows = []
 
 def get_nginx_worker_pid():
     try:
@@ -96,6 +107,9 @@ def run_triggers():
     worker_pid = -1
     prev_pid = -1
     for blob_file in blob_files:
+        cpv_number = int(blob_file.split('cpv')[1].split('.blob')[0])
+        if 'bcpv' in blob_file:
+            cpv_number += 17 # hack
         request = None
         try:
             with open(blob_file, "rb") as file:
@@ -112,6 +126,13 @@ def run_triggers():
                 time.sleep(2)
                 prev_pid = get_nginx_worker_pid()
                 print(f'[*] Nginx worker PID = {prev_pid}')
+                # save the pid
+                if configuration == "aarch64":
+                    aarch64_pids[cpv_number] = prev_pid
+                elif configuration == "aarch64c":
+                    aarch64c_pids[cpv_number] = prev_pid
+                else:
+                    aarch64c_q0_pids[cpv_number] = prev_pid
                 send_request(request, verbose=False)
                 time.sleep(1) # allow some time
                 worker_pid = get_nginx_worker_pid()
@@ -122,6 +143,27 @@ def run_triggers():
             finally:
                 stop_nginx(configuration)
                 time.sleep(1)
+
+
+def find_exit_signal(log_file, pid):
+    pattern = re.compile(rf"\b{pid}\b exited on signal (\d+)")
+    with open(log_file, 'r') as file:
+        for line in file:
+            match = pattern.search(line)
+            if match:
+                signal = match.group(1)
+                return int(signal)
+    return None
+
+
+def get_signal_name(sig_num):
+    for name in dir(signal):
+        if name.startswith("SIG") and not name.startswith("SIG_"):
+            if sig_num == getattr(signal, name):
+                return name
+    if sig_num == 34:
+        return "SIGPROT"
+    return f"Unknown signal ({sig_num})"
 
 
 def main():
@@ -138,6 +180,27 @@ def main():
     with open(aarch64c_error_log_path, 'w') as fp:
         pass
     run_triggers()
+
+    # analyse error.log with process ids in order to determine the signal
+    for i in range(1, 17+2+1):
+        if not i in aarch64_pids.keys(): # assume keys are the same for other configs
+            continue
+        aarch64_signal = find_exit_signal(aarch64_error_log_path, aarch64_pids[i])
+        aarch64c_signal = find_exit_signal(aarch64c_error_log_path, aarch64c_pids[i])
+        aarch64c_q0_signal = find_exit_signal(aarch64c_error_log_path, aarch64c_q0_pids[i])
+        if i > 17:
+            cpv_number = "B" + str(i - 17)
+        else:
+            cpv_number = str(i)
+        if cpv_number == 12: # Linux-specific code path
+            row = [cpv_number, "N/A", "N/A", "N/A"]
+        else:
+            row = [cpv_number, get_signal_name(aarch64_signal) if aarch64_signal else '-',
+                    get_signal_name(aarch64c_signal) if aarch64c_signal else '-',
+                    get_signal_name(aarch64c_q0_signal) if aarch64c_q0_signal else '-']
+        table_rows.append(row)
+        
+    print(tabulate(table_rows, headers=table_headers, tablefmt="plain"))
 
 if __name__ == "__main__":
     main()
