@@ -19,8 +19,8 @@ pop3_port = 1111
 
 # 3 configurations: aarch64, aarch64c, aarch64c+Q0
 configurations = ["aarch64", "aarch64c", "aarch64c+Q0"]
-nginx_aarch64c_bin = "../objs_aarch64c/nginx"
-nginx_aarch64_bin = "../objs_aarch64/nginx"
+nginx_aarch64c_bin = "../install_aarch64c/sbin/nginx"
+nginx_aarch64_bin = "../install_aarch64/sbin/nginx"
 aarch64_error_log_path = '/tmp/nginx_aarch64/error.log'
 aarch64c_error_log_path = '/tmp/nginx_aarch64c/error.log'
 
