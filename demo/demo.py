@@ -49,8 +49,17 @@ aarch64_pids = {}
 aarch64c_pids = {}
 aarch64c_q0_pids = {}
 
-table_headers = ["CPV", "aarch64", "aarch64c", "aarch64c+Q0"]
+table_headers = ["CPV", "aarch64", "aarch64c", "aarch64c+Q0", "Mitigated", "Note"]
 table_rows = []
+
+# hardcoded Notes column
+notes_columns = {}
+for i in [1, 2, 3, 4, 8, 10, 14, 15, 18, 19, 12]:
+    notes_columns[i] = 'Spatial'
+for i in [5, 13]:
+    notes_columns[i] = 'NULL deref'
+for i in [9, 11, 17]:
+    notes_columns[i] = 'Temporal'
 
 
 def get_nginx_worker_pid(configuration):
@@ -223,11 +232,13 @@ def main():
         else:
             cpv_number = str(i)
         if cpv_number == "12": # Linux-specific code path
-            row = [cpv_number, "N/A", "N/A", "N/A"]
+            row = [cpv_number, "N/A", "N/A", "N/A", "N/A", notes_columns[i]]
         else:
             row = [cpv_number, get_signal_name(aarch64_signal) if aarch64_signal else '-',
                     get_signal_name(aarch64c_signal) if aarch64c_signal else '-',
-                    get_signal_name(aarch64c_q0_signal) if aarch64c_q0_signal else '-']
+                    get_signal_name(aarch64c_q0_signal) if aarch64c_q0_signal else '-',
+                    "Yes" if aarch64c_q0_signal else "No",
+                    notes_columns[i]]
         table_rows.append(row)
         
     print(tabulate(table_rows, headers=table_headers, tablefmt="plain"))
