@@ -138,11 +138,11 @@ def run_trigger(configuration, cpv_number, request):
     worker_pid = -1
     prev_pid = -1
     try:
-        print(f'[*] Configuration {configuration}')
+        # print(f'[*] Configuration {configuration}')
         start_nginx(conf_file[configuration], configuration)
         # time.sleep(2)
         prev_pid = get_nginx_worker_pid(configuration)
-        print(f'[*] Nginx worker PID = {prev_pid}')
+        # print(f'[*] Nginx worker PID = {prev_pid}')
         # save the pid
         if configuration == "aarch64":
             aarch64_pids[cpv_number] = prev_pid
@@ -154,9 +154,9 @@ def run_trigger(configuration, cpv_number, request):
         time.sleep(1) # allow some time
         worker_pid = get_nginx_worker_pid(configuration)
         if worker_pid != prev_pid:
-            print(f'[+] Nginx worker process crashed!')
+            print(f'[+] {configuration} Nginx worker process (PID={prev_pid}) crashed!')
         else:
-            print(f"[!] Nginx worker process didn't crash")
+            print(f"[!] {configuration} Nginx worker process (PID={prev_pid}) didn't crash")
     finally:
         stop_nginx(configuration)
         time.sleep(1)
