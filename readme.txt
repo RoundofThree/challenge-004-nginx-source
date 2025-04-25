@@ -1,13 +1,13 @@
 Morello Build Instructions
 ==========================
 
-This code was tested on the latest official CheriBSD Release (24.05)
+This code was tested on the latest official CheriBSD Release (25.03)
 available here: https://www.cheribsd.org
 
 * Once CheriBSD is installed Make sure the following packages are installed:
 
 pkg64 install llvm-base-20240315
-pkg64 install llvm-morello-14.0.d20240325_1
+pkg64 install llvm-morello-15.0.d20250318
 pkg64 install git
 pkg64c install sudo
 
