@@ -11,6 +11,11 @@ pkg64 install llvm-morello-15.0.d20250318
 pkg64 install git
 pkg64c install sudo
 
+* If you are going to use the demo.py script, also install these packages:
+
+pkg64 install python3-3_3
+pkg64 install py39-tabulate-0.8.9
+
 * Build the nginx server locally
 
 ./configure --with-cc-opt='-Wno-cheri-provenance' --without-http_geo_module --with-http_ssl_module --with-pcre --with-compat --with-mail --with-http_v2_module
