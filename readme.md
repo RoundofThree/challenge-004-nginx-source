@@ -22,6 +22,7 @@ pkg64 install llvm-morello-15.0.d20250318
 pkg64 install git
 pkg64 install python3-3_3
 pkg64 install py39-tabulate-0.8.9
+pkg64 install pcre
 ```
 
 The [demo folder](./demo/) has a [build.sh](./demo/build.sh) script, which builds for the
