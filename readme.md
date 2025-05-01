@@ -20,7 +20,6 @@ Once CheriBSD is installed, make sure the following packages are installed:
 pkg64 install llvm-base-20240315
 pkg64 install llvm-morello-15.0.d20250318
 pkg64 install git
-pkg64c install sudo
 pkg64 install python3-3_3
 pkg64 install py39-tabulate-0.8.9
 ```
