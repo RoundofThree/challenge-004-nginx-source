@@ -44,6 +44,9 @@ aarch64_pid_path = '/tmp/nginx_aarch64/nginx.pid'
 aarch64c_pid_path = '/tmp/nginx_aarch64c/nginx.pid'
 aarch64c_q0_pid_path = '/tmp/nginx_aarch64c/nginx-q0.pid'
 
+# hardcoded envvars
+envvars = 'MALLOC_CONF="junk:false"'
+
 # results. cpv number (where bcpv counts as 17+i) -> PID
 aarch64_pids = {}
 aarch64c_pids = {}
@@ -82,11 +85,11 @@ def get_nginx_worker_pid(configuration):
 def start_nginx(config_file, configuration):
     absolute_config_path = os.path.abspath(config_file)
     if configuration == "aarch64":
-        command = f"{nginx_aarch64_bin} -c {absolute_config_path}"
+        command = f"{envvars} {nginx_aarch64_bin} -c {absolute_config_path}"
     elif configuration == "aarch64c":
-        command = f"{nginx_aarch64c_bin} -c {absolute_config_path}"
+        command = f"{envvars} {nginx_aarch64c_bin} -c {absolute_config_path}"
     elif configuration == "aarch64c+Q0":
-        command = f"_RUNTIME_REVOCATION_EVERY_FREE_ENABLE=1 {nginx_aarch64c_bin} -c {absolute_config_path}"
+        command = f"{envvars} _RUNTIME_REVOCATION_EVERY_FREE_ENABLE=1 {nginx_aarch64c_bin} -c {absolute_config_path}"
     else:
         raise Exception(f"Unknown configuration {configuration}")
     ret = os.system(command)
