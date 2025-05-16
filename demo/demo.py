@@ -1,7 +1,7 @@
 # python demo.py
 # see coredumps in /tmp/cores/
 
-import os
+import os, sys
 import socket
 import time
 import signal
@@ -40,9 +40,11 @@ nginx_aarch64c_bin = "../install_aarch64c/sbin/nginx"
 nginx_aarch64_bin = "../install_aarch64/sbin/nginx"
 aarch64_error_log_path = '/tmp/nginx_aarch64/error.log'
 aarch64c_error_log_path = '/tmp/nginx_aarch64c/error.log'
-aarch64_pid_path = '/tmp/nginx_aarch64/nginx.pid'
-aarch64c_pid_path = '/tmp/nginx_aarch64c/nginx.pid'
-aarch64c_q0_pid_path = '/tmp/nginx_aarch64c/nginx-q0.pid'
+pid_path = {
+    'aarch64': '/tmp/nginx_aarch64/nginx.pid',
+    'aarch64c': '/tmp/nginx_aarch64c/nginx.pid',
+    'aarch64c+Q0': '/tmp/nginx_aarch64c/nginx-q0.pid',
+}
 
 # hardcoded envvars
 envvars = 'MALLOC_CONF="junk:false"'
@@ -67,18 +69,12 @@ for i in [9, 11, 17]:
 
 def get_nginx_worker_pid(configuration):
     master_pid = None
-    if configuration == "aarch64":
-        pid_path = aarch64_pid_path
-    elif configuration == "aarch64c":
-        pid_path = aarch64c_pid_path
-    else:
-        pid_path = aarch64c_q0_pid_path
     try:
-        with open(pid_path, 'r') as fp:
+        with open(pid_path[configuration], 'r') as fp:
             master_pid = int(fp.read().strip())
     except:
-        print("Error reading pid file", pid_path)
-        return None
+        print("Error reading pid file", pid_path[configuration])
+        sys.exit(-1)
     worker_pid = int(subprocess.check_output(["pgrep", "-P", str(master_pid)]).decode().split()[0])
     return worker_pid
 
@@ -104,7 +100,7 @@ def stop_nginx(configuration):
     elif configuration == "aarch64c":
         os.system(f"{nginx_aarch64c_bin} -s stop")
     else: # aarch64c+Q0
-        os.system(f"kill $(cat {aarch64c_q0_pid_path})")
+        os.system(f"kill $(cat {pid_path['aarch64c+Q0']})")
     # print("[+] NGINX stopped")
 
 
@@ -140,10 +136,20 @@ def list_blob_files(directory="."):
 def run_trigger(configuration, cpv_number, request):
     worker_pid = -1
     prev_pid = -1
+    timeout = 5
+    interval = 0.1
+    pid_file = pid_path[configuration]
     try:
-        # print(f'[*] Configuration {configuration}')
+        # clean the pid file
+        if os.path.exists(pid_file):
+            os.remove(pid_file)
         start_nginx(conf_file[configuration], configuration)
-        # time.sleep(2)
+        # wait until the Nginx process creates the PID file
+        start_time = time.time()
+        while not os.path.exists(pid_file):
+            if time.time() - start_time > timeout:
+                raise TimeoutError(f"Nginx {configuration} did not create PID file within {timeout} seconds.")
+            time.sleep(interval)
         prev_pid = get_nginx_worker_pid(configuration)
         # print(f'[*] Nginx worker PID = {prev_pid}')
         # save the pid
